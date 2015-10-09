@@ -1,0 +1,12 @@
+- name: Ensure some base packages are installed.
+  apt: name={{ item }} state=latest update_cache=yes
+  with_items:
+    - curl
+    - git
+    - vim
+    - wget
+    - mc
+    - python-mysqldb # required by ansible mysql
+
+- name: Ensure user `vagrant` is part of `vboxsf` group (to access shared folder).
+  user: name=vagrant groups=vboxsf append=yes

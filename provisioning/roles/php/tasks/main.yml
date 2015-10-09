@@ -1,0 +1,62 @@
+- name: Ensure PHP PPA is enabled
+  apt_repository: repo={{ item }}
+  with_items:
+    - 'ppa:ondrej/php5-oldstable' # 5.4
+    - 'ppa:ondrej/php5'           # 5.5
+    - 'ppa:ondrej/php5-5.6'       # 5.6
+#   - 'ppa:ondrej/php-7.0'        # 7.0 (something wrong with this PPA)
+
+- name: Update apt cache
+  apt: update_cache=yes
+
+- name: Ensure PHP is installed
+  apt: name=php5={{ php.version }}* state=installed
+
+- name: Ensure required PHP extensions are installed
+  apt: name={{ item }} state=present
+  with_items: php.extensions
+
+- name: Ensure php5-dev is installed if any PECL extenstions are required
+  apt: name=php5-dev={{ php.version }}* state=installed
+  when: php.pecl_extensions|length > 0
+
+- name: Ensure required PECL extensions are installed
+  shell: "yes '' | sudo pecl install {{ item }}"
+  register: pecl_result
+  changed_when: "'already installed' not in pecl_result.stdout"
+  failed_when: "('ERROR' in pecl_result.stdout)"
+  with_items: php.pecl_extensions
+
+- name: Ensure required PECL extensions are included in PHP.ini
+  lineinfile: dest=/etc/php5/apache2/php.ini
+                line="extension={{item}}.so"
+                state=present
+  with_items: php.pecl_extensions
+
+- name: Ensure required PECL extensions are included in cli version of PHP.ini
+  lineinfile: dest=/etc/php5/cli/php.ini
+                line="extension={{item}}.so"
+                state=present
+  with_items: php.pecl_extensions
+
+- name: Ensure console version of PHP is installed
+  apt: name=php5-cli={{ php.version }}* state=installed
+  when: php.cli
+
+- name: Writing PHP settings into apache version of php.ini
+  lineinfile: dest=/etc/php5/apache2/php.ini
+              regexp='^{{ item.key }}\s?='
+              line="{{ item.key }} = {{ item.value }}"
+  with_dict: php.settings
+
+- name: Writing PHP settings into cli version of php.ini
+  lineinfile: dest=/etc/php5/cli/php.ini
+              regexp='^{{ item.key }}\s?='
+              line="{{ item.key }} = {{ item.value }}"
+  with_dict: php.settings
+  when: php.cli
+
+# Restarting apache2 to be sure all changes take effect
+# TODO: replace this copy/paste task with something better
+- name: Restarting Apache webserver
+  service: name=apache2 state=reloaded

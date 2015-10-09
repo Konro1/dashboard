@@ -1,0 +1,28 @@
+- name: Ensure MySQL PPA is enabled (for newer versions of MySQL)
+  apt_repository: repo={{ item }}
+  with_items:
+    - 'ppa:ondrej/mysql-5.5'
+    - 'ppa:ondrej/mysql-5.6'
+    - 'ppa:ondrej/mysql-5.7'
+
+- name: Update apt cache
+  apt: update_cache=yes
+
+- name: Ensure MySQL is installed
+  apt: name={{ item }}={{ dbms.version }}* state=installed
+  with_items:
+    - mysql-server
+    - mysql-client
+
+# Create databases
+- mysql_db: name={{item.key}} state=present encoding={{item.value.connection.encoding}} collation={{item.value.connection.collation}}
+  with_dict: dbms.databases
+
+# Import database from remote host
+- mysql_db: name={{item.key}} login_host={{item.value.connection.host}} login_user={{item.value.connection.user}} login_password={{item.value.connection.password}} login_port={{item.value.connection.port}} state=dump target=/tmp/dump-{{item.key}}.sql.gz encoding={{item.value.connection.encoding}} collation={{item.value.connection.collation}}
+  with_dict: dbms.databases
+  when: item.value.import_backup
+
+- mysql_db: name={{item.key}} state=import target=/tmp/dump-{{item.key}}.sql.gz encoding={{item.value.connection.encoding}} collation={{item.value.connection.collation}}
+  with_dict: dbms.databases
+  when: item.value.import_backup

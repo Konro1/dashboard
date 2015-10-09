@@ -1,0 +1,16 @@
+<VirtualHost *:80>
+  ServerName {{ webserver.host }}
+  ServerAdmin webmaster@{{ webserver.host }}
+
+  DocumentRoot {{ webserver.root }}/{{ webserver.public }}
+  <Directory {{ webserver.root }}/{{ webserver.public }}>
+    Options Indexes FollowSymLinks MultiViews
+    AllowOverride All
+    Require all granted
+  </Directory>
+
+  CustomLog ${APACHE_LOG_DIR}/access_{{ webserver.host }}.log combined
+  ErrorLog ${APACHE_LOG_DIR}/error_{{ webserver.host }}.log
+  LogLevel warn
+  ServerSignature Off
+</VirtualHost>

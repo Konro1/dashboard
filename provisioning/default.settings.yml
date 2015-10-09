@@ -1,0 +1,163 @@
+# Default Vagrant, VirtualBox and Ansible settings.
+
+# Project settings
+project:
+  name: project                             # Project name, by default is used as a part of host name
+  playbook: default                         # Default playbook file name (see: provisioning/playbooks/ folder)
+
+# Virtual machine settings
+vm:
+  name:                                     # Virtual machine name; `vm.box.name`-`project.name` if empty
+  box:
+    version: "14.04"                        # Box version
+    name: ubuntu/trusty64                   # Box name
+    url:                                    # Box URL from where it will be downloaded, if a specific box is needed
+  sync:
+    source: httpdocs
+    destination: /var/www/html
+  specs:
+    cpus: 2
+    ram: 2048
+    cpuexecutioncap: 100
+
+# Network (host os to guest os) settings
+network:
+  ip:                                       # IP of the guest OS; random if empty
+  host:
+    prefix: local                           # The first part of the default hostname
+    name:                                   # The second part of the default host name; `project.name` by default
+    aliases:                                # The list of alias hostnames
+
+# list of software to be installed (see `provioning/roles/`)
+software:
+  webserver: yes
+  php: yes
+  composer: no
+  dbms: yes
+  behat: yes
+
+# Webserver settings
+# We use apache2
+webserver:
+  version: 2.4                              # It can be 2.2 or 2.4 for now
+  host:                                     # Full hostname; `network.host.prefix`.`network.host.name` by default
+  root: /var/www/html                       # The root folder of the webserver on the guest os
+  public: ""                                # Public directory, where index.php is located
+
+# Database management system
+# MySQL only
+dbms:
+  version: 5.6
+  databases:                                # A list of databases to be created
+    main:                                   # Database name
+      import_backup: no                     # Do you want it to be imported from remote dbms?
+      connection:                           # Config of the remote dbms
+        host: localhost
+        user: root
+        password: ""
+        port: 3306
+        encoding: utf8                      # This option is used to create a local database
+        collation: utf8_general_ci          # This option is used to create a local database
+
+php:
+  version: 5.5
+  cli: no                                   # Do we need console version of php?
+  settings:
+    # php settings
+    date.timezone: 'Europe/Kiev'
+    display_errors: 'On'
+    error_reporting: 'E_ALL'
+    memory_limit: '512M'
+    max_execution_time: '90'
+    max_input_time: '60'
+    post_max_size: '16M'
+    upload_max_filesize: '16M'
+    max_file_uploads: '20'
+    # xdebug settings
+    xdebug_max_nesting_level: '250'
+    xdebug_scream: '1'
+    xdebug_cli_color: '1'
+    xdebug_show_local_vars: '1'
+  extensions:                               # List of extensions to be installed
+    json: yes
+    curl: yes
+    xdebug: yes
+    gd: yes
+    mcrypt: yes
+    mysql: yes
+    sqlite: no
+  pecl_extensions:
+    scrypt: no
+    gearman: no
+
+composer:
+  user: vagrant
+  user_home_dir: /home/vagrant
+
+selenium:
+  version: 2.45.0
+  dest: /usr/local/bin
+  autostart: true
+
+behat:
+  global_installation: true
+  composer_packages:
+    - name: "drupal/drupal-extension"
+      version: "~3.0"
+    - name: "behat/mink-extension"
+      version: "@stable"
+    - name: "behat/mink-goutte-driver"
+      version: "@stable"
+    - name: "behat/mink-selenium2-driver"
+      version: "@stable"
+    - name: "behat/mink-zombie-driver"
+      version: "*"
+    - name: behat/mink-browserkit-driver
+      version: "*"
+
+
+# Packages to required on the host machine (works only on Linux)
+packages:
+  - name: "VirtualBox"
+    messages:
+      installation_instructions: >
+        Please install VirtualBox manually using this guide:
+        https://www.virtualbox.org/manual/ch02.html
+        Then run `vagrant up` again
+      package_not_installed: "You do not have installed VirtualBox"
+      unknown_package_manager: "You are using system with an unknown package manager, we cannot install VirtualBox for you."
+    commands:
+      check_prensence: "which VirtualBox"
+      installation:
+        apt-get:
+          - "sudo apt-get -y install virtualbox"
+        yum:
+          - "sudo yum -y install VirtualBox-4.3"
+
+  - name: "Ansible"
+    messages:
+      installation_instructions: >
+        Please install Ansible provisioner manually using this guide:
+        http://docs.ansible.com/intro_installation.html
+        Then run `vagrant provision` to finish
+      package_not_installed: "You do not have installed ansible"
+      unknown_package_manager: "You are using system with an unknown package manager, we cannot install Ansible for you."
+    commands:
+      check_prensence: "which ansible"
+      installation:
+        apt-get:
+          - "sudo apt-get -y install software-properties-common"
+          - "sudo apt-add-repository -y ppa:ansible/ansible"
+          - "sudo apt-get -y update"
+          - "sudo apt-get -y install ansible"
+        yum:
+          - "sudo yum -y install ansible"
+
+# Vagrant plugins
+vagrant_plugins:
+  - name: "vagrant-hostsupdater"
+    platforms: all
+
+  - name: "vagrant-winnfsd"
+    platforms:
+      - windows

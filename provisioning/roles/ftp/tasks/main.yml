@@ -1,0 +1,11 @@
+- name: Make suer FTP server is installed
+  apt: name=vsftpd state=present
+
+- name:
+  lineinfile: dest=/etc/vsftpd.conf
+              regexp='^{{ item.key }}\s?='
+              line="{{ item.key }} = {{ item.value }}"
+  with_dict: ftp.settings
+
+- name: Restarting FTP server
+  service: name=vsftpd state=reloaded

@@ -1,0 +1,7 @@
+---
+dependencies:
+  - { role: "../../roles/composer" }
+  - { role: "../../roles/nodejs" }
+  - { role: "../../roles/java" }
+  - { role: "../../roles/firefox" }
+  - { role: "../../roles/selenium" }

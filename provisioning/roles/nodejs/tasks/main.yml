@@ -1,0 +1,8 @@
+- name: install nodejs
+  apt: pkg={{item}} state=present
+  with_items:
+    - nodejs
+    - nodejs-legacy
+
+- name: install npm
+  apt: pkg=npm state=present

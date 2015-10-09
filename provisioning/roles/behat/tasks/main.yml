@@ -1,0 +1,9 @@
+- name: Make sure Zombie.js is installed
+  npm: name=zombie global=yes
+  sudo: yes
+
+- name: Install Behat
+  shell: composer global require '{{item.name}}={{item.version}}'
+  sudo: no
+  with_items: behat.composer_packages
+  when: behat.global_installation

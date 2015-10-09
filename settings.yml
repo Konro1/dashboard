@@ -1,0 +1,95 @@
+# Default Vagrant, VirtualBox and Ansible settings.
+
+# Project settings
+project:
+  name: up-dashboard                             # Project name, by default is used as a part of host name
+  playbook: default                         # Default playbook file name (see: provisioning/playbooks/ folder)
+
+# Virtual machine settings
+vm:
+  name:                                     # Virtual machine name; `vm.box.name`-`project.name` if empty
+  box:
+    version: "14.04"                        # Box version
+    name: ubuntu/trusty64                   # Box name
+    url:                                    # Box URL from where it will be downloaded, if a specific box is needed
+  sync:
+    source: httpdocs
+    destination: /var/www/html
+  specs:
+    cpus: 2
+    ram: 2048
+    cpuexecutioncap: 100
+
+# Network (host os to guest os) settings
+network:
+  ip:                                       # IP of the guest OS; random if empty
+  host:
+    prefix: local                           # The first part of the default hostname
+    name:                                   # The second part of the default host name; `project.name` by default
+    aliases:                                # The list of alias hostnames
+
+# list of software to be installed (see `provioning/roles/`)
+software:
+  webserver: yes
+  php: yes
+  composer: yes
+  dbms: yes
+  behat: yes
+
+# Webserver settings
+# We use apache2
+webserver:
+  version: 2.4                              # It can be 2.2 or 2.4 for now
+  host:                                     # Full hostname; `network.host.prefix`.`network.host.name` by default
+  root: /var/www/html                       # The root folder of the webserver on the guest os
+  public: "public"                                # Public directory, where index.php is located
+
+# Database management system
+# MySQL only
+dbms:
+  version: 5.6
+  databases:                                # A list of databases to be created
+    dashboard_db:                                   # Database name
+      import_backup: no                     # Do you want it to be imported from remote dbms?
+      connection:                           # Config of the remote dbms
+        host: localhost
+        user: root
+        password: "password"
+        port: 3306
+        encoding: utf8                      # This option is used to create a local database
+        collation: utf8_general_ci          # This option is used to create a local database
+
+php:
+  version: 5.5
+  cli: no                                   # Do we need console version of php?
+  settings:
+    # php settings
+    date.timezone: 'Europe/Kiev'
+    display_errors: 'On'
+    error_reporting: 'E_ALL'
+    memory_limit: '512M'
+    max_execution_time: '90'
+    max_input_time: '60'
+    post_max_size: '16M'
+    upload_max_filesize: '16M'
+    max_file_uploads: '20'
+    # xdebug settings
+    xdebug_max_nesting_level: '250'
+    xdebug_scream: '1'
+    xdebug_cli_color: '1'
+    xdebug_show_local_vars: '1'
+  extensions:                               # List of extensions to be installed
+    json: yes
+    curl: yes
+    xdebug: yes
+    gd: yes
+    mcrypt: yes
+    mysql: yes
+    sqlite: no
+  pecl_extensions:
+    scrypt: no
+    gearman: no
+
+composer:
+  user: vagrant
+  user_home_dir: /home/vagrant

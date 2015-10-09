@@ -1,0 +1,23 @@
+- name: install composer.phar
+  shell: >
+    creates=/usr/local/bin/composer \
+    if which composer; \
+      then echo "Composer already installed\n"; \
+    else \
+      /usr/bin/curl -sS https://getcomposer.org/installer | \
+      /usr/bin/php -- --install-dir=/usr/local/bin && \
+      mv -f /usr/local/bin/composer.phar /usr/local/bin/composer; \
+    fi;
+
+#- name: Increase swap size
+#  shell: /bin/dd if=/dev/zero of=/var/swap.1 bs=1M count=1024 && /sbin/mkswap /var/swap.1 && /sbin/swapon /var/swap.1
+#  sudo: yes
+
+- name: Create global .composer folder
+  file: path={{ composer.user_home_dir }}/.composer owner={{ composer.user }} state=directory
+
+- name: Add global composer bin directory to PATH
+  lineinfile: dest={{composer.user_home_dir}}/.bashrc line="export PATH=~/.composer/vendor/bin:$PATH" owner={{ composer.user }} group={{ composer.user }}
+
+- name: Add global composer bin directory to PATH
+  lineinfile: dest={{composer.user_home_dir}}/.bashrc line="export PATH=/usr/local/bin:$PATH" owner={{ composer.user }} group={{ composer.user }}

@@ -1,0 +1,2 @@
+- name: Make sure Firefox is installed
+  apt: name=firefox state=installed

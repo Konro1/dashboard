@@ -1,0 +1,12 @@
+- name: Make sure Xvfb is installed
+  apt: name=xvfb state=installed
+
+- name: Make sure Selenium is installed
+  get_url:
+    url=http://selenium-release.storage.googleapis.com/{{ ".".join(selenium.version.split(".")[:2]) }}/selenium-server-standalone-{{ selenium.version }}.jar
+    dest={{ selenium.dest }}/selenium-server-standalone-{{ selenium.version }}.jar
+
+- name: Start selenium
+  shell: DISPLAY=:1 xvfb-run -a --server-args="-screen 0 1280x1024x8" java -jar {{ selenium.dest }}/selenium-server-standalone-{{ selenium.version }}.jar &
+  when: selenium.autostart
+  sudo: no

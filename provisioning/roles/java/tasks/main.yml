@@ -1,0 +1,2 @@
+- name: Make sure openjdk-7 is installed
+  apt: name=openjdk-7-jre-headless state=installed

@@ -1,0 +1,10 @@
+- hosts: all
+  sudo: true
+  user: vagrant
+  roles:
+    - { role: "../roles/common" }
+    - { role: "../roles/webserver", when: "software.webserver" }
+    - { role: "../roles/php", when: "software.php" }
+    - { role: "../roles/composer", when: "software.composer" }
+    - { role: "../roles/dbms", when: "software.dbms" }
+    - { role: "../roles/behat", when: "software.behat" }

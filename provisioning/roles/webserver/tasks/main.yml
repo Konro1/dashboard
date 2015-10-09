@@ -1,0 +1,22 @@
+# Installing apache2
+- name: Ensure Apache webserver is installed.
+  apt: name=apache2={{ webserver.version }}* state=installed
+
+# Enabling mod_rewrite, because it's disabled by defaut on ubuntu
+- name: Ensure Apache's mod_rewrite is enabled.
+  command: /usr/sbin/a2enmod rewrite
+
+# Removing 000-default.conf if exists
+- name: Removing old virtual host config
+  file: path=/etc/apache2/sites-enabled/000-default.conf state=absent
+
+# Creating new 000-default.conf
+- name: Create Apache webserver virtual host
+  template: src=virtualhost.j2 dest=/etc/apache2/sites-available/000-default.conf owner=root mode=0744
+
+- name: Enable Apache's virtual host
+  command: /usr/sbin/a2ensite 000-default.conf
+
+# Restarting apache2 to be sure all changes take effect
+- name: Restarting Apache webserver
+  service: name=apache2 state=reloaded
